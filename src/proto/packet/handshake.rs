@@ -1,4 +1,7 @@
-use crate::proto::decoder::fetch_string;
+use crate::proto::{
+    decoder::fetch_string,
+    encoder::{put_short, put_string},
+};
 
 use super::Packet;
 
@@ -12,5 +15,15 @@ impl Packet for Handshake {
         Ok(Handshake {
             nick: fetch_string(r).await?,
         })
+    }
+
+    async fn encode<W: monoio::io::AsyncWriteRent>(&self, w: &mut W) -> color_eyre::Result<()>
+    where
+        Self: Sized,
+    {
+        put_short(w, 0x02).await?;
+        put_string(w, &self.nick).await?;
+
+        Ok(())
     }
 }

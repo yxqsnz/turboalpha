@@ -4,11 +4,15 @@ use monoio::io::{AsyncReadRent, AsyncReadRentExt};
 use self::packet::{Handshake, Packet, PacketKind};
 
 pub mod decoder;
+pub mod encoder;
+
 pub mod packet;
+
 pub struct Packets;
 
 impl Packets {
     pub async fn decode<R: AsyncReadRent + AsyncReadRentExt>(r: &mut R) -> Result<PacketKind> {
+        tracing::trace!("Reading packet");
         let packet_id = r.read_i8_le().await?;
 
         tracing::debug!("Trying to decode packet: {packet_id}");

@@ -11,21 +11,28 @@ use monoio::{
 use tracing::{info, instrument};
 use tracing_subscriber::EnvFilter;
 
-use crate::proto::{packet::PacketKind, Packets};
+use crate::proto::{
+    packet::{Packet, PacketKind},
+    Packets,
+};
 
 pub mod proto;
 
 #[instrument(name = "Handle client", skip(stream))]
 async fn accept(mut stream: TcpStream, addr: SocketAddr) -> Result<()> {
     tracing::info!("accepted connection");
-    let packet = Packets::decode(&mut stream).await?;
+    loop {
+        let packet = Packets::decode(&mut stream).await?;
 
-    match packet {
-        PacketKind::Handshake(hshake) => {
-            tracing::info!("Player <{}> is trying to join the server", hshake.nick)
+        match packet {
+            PacketKind::Handshake(mut hshake) => {
+                tracing::info!("Player <{}> is trying to join the server", hshake.nick);
+
+                hshake.nick = "-".to_string();
+                hshake.encode(&mut stream).await?;
+            }
         }
     }
-    Ok(())
 }
 
 #[monoio::main]
