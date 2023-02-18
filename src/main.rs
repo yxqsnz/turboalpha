@@ -8,11 +8,11 @@ use monoio::{
     net::{TcpListener, TcpStream},
     spawn,
 };
-use tracing::{info, instrument};
+use tracing::{debug, info, instrument};
 use tracing_subscriber::EnvFilter;
 
 use crate::proto::{
-    packet::{Packet, PacketKind},
+    packet::{LoginResponse, Packet, PacketKind},
     Packets,
 };
 
@@ -34,6 +34,16 @@ async fn accept(mut stream: TcpStream, addr: SocketAddr) -> Result<()> {
 
             PacketKind::LoginRequest(req) => {
                 tracing::info!("Player <{}> is logging...", req.username);
+                let response = LoginResponse {
+                    server_name: "".to_string(),
+                    server_motd: "".to_string(),
+                    map_seed: 971768181197178410,
+                    dimension: -1,
+                    entity_id: 0,
+                };
+
+                response.encode(&mut stream).await?;
+                debug!("Sent login response");
             }
         }
     }

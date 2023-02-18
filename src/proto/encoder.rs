@@ -2,11 +2,24 @@ use std::io::Result;
 
 use monoio::io::AsyncWriteRent;
 
-pub async fn put_short<W: AsyncWriteRent>(w: &mut W, value: u16) -> Result<()> {
-    let data = value.to_be_bytes().to_vec();
-    let (res, _) = w.write(data).await;
-    res?;
-    Ok(())
+macro_rules! impl_num {
+    ($($name:tt => $ty:ty,)*) => {
+        $(
+        pub async fn $name<W: AsyncWriteRent>(w: &mut W, value: $ty) -> Result<()> {
+            let data = value.to_be_bytes().to_vec();
+            let (res, _) = w.write(data).await;
+            res?;
+            Ok(())
+        }
+        )*
+    };
+}
+
+impl_num! {
+    put_short => u16,
+    put_int => i32,
+    put_long => i64,
+    put_byte => i8,
 }
 
 pub async fn put_string<W: AsyncWriteRent>(w: &mut W, data: &str) -> Result<()> {
