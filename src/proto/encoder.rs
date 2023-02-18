@@ -32,3 +32,9 @@ pub async fn put_string<W: AsyncWriteRent>(w: &mut W, data: &str) -> Result<()> 
 
     Ok(())
 }
+
+pub async fn put_bool<W: AsyncWriteRent>(w: &mut W, data: bool) -> Result<()> {
+    let (res, _wrote) = w.write(vec![data as u8]).await;
+    res?;
+    Ok(())
+}

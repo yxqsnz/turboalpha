@@ -7,12 +7,17 @@ mod login_request;
 pub use handshake::*;
 mod login_response;
 mod map_chunk;
+mod player_inventory;
 mod pre_chunk;
+mod spawn_position;
+
 pub use kick::*;
 pub use login_request::*;
 pub use login_response::*;
 pub use map_chunk::*;
+pub use player_inventory::{Item, Kind as InventoryKind, PlayerInventory};
 pub use pre_chunk::*;
+pub use spawn_position::*;
 
 pub enum PacketKind {
     Handshake(Handshake),

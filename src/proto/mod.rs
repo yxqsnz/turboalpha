@@ -17,7 +17,7 @@ impl Packets {
         tracing::trace!("Reading packet");
         let packet_id = r.read_i8_le().await?;
 
-        tracing::debug!("Trying to decode packet: {packet_id}");
+        tracing::debug!("Trying to decode packet: {packet_id} ({packet_id:X})");
         match packet_id {
             0x02 => Ok(PacketKind::Handshake(Handshake::decode(r).await?)),
             0x01 => Ok(PacketKind::LoginRequest(LoginRequest::decode(r).await?)),

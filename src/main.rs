@@ -2,6 +2,7 @@
 #![feature(async_fn_in_trait)]
 
 use color_eyre::Result;
+use proto::packet::{Item, PlayerInventory, PreChunk, SpawnPosition};
 use std::net::SocketAddr;
 
 use monoio::{
@@ -17,6 +18,47 @@ use crate::proto::{
 };
 
 pub mod proto;
+
+async fn fake_chunks(s: &mut TcpStream) -> Result<()> {
+    PreChunk {
+        mode: true,
+        x: 0,
+        z: 0,
+    }
+    .encode(s)
+    .await?;
+
+    SpawnPosition { x: 0, y: 0, z: 0 }.encode(s).await?;
+
+    let diamond = Item {
+        count: 64,
+        id: 57,
+        used: 0,
+    };
+
+    let iv_main = PlayerInventory {
+        count: 26,
+        kind: proto::packet::InventoryKind::MainInventory,
+        payload: vec![diamond.clone(); 26],
+    };
+
+    let iv_armor = PlayerInventory {
+        count: 4,
+        kind: proto::packet::InventoryKind::EquippedArmor,
+        payload: vec![diamond.clone(); 4],
+    };
+
+    let iv_craft = PlayerInventory {
+        count: 4,
+        kind: proto::packet::InventoryKind::CrafitingSlots,
+        payload: vec![diamond; 4],
+    };
+
+    iv_main.encode(s).await?;
+    iv_armor.encode(s).await?;
+    iv_craft.encode(s).await?;
+    Ok(())
+}
 
 #[instrument(name = "Handle client", skip(stream))]
 async fn accept(mut stream: TcpStream, addr: SocketAddr) -> Result<()> {
@@ -44,6 +86,7 @@ async fn accept(mut stream: TcpStream, addr: SocketAddr) -> Result<()> {
 
                 response.encode(&mut stream).await?;
                 debug!("Sent login response");
+                fake_chunks(&mut stream).await?;
             }
         }
     }
