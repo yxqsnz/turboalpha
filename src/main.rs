@@ -31,6 +31,10 @@ async fn accept(mut stream: TcpStream, addr: SocketAddr) -> Result<()> {
                 hshake.nick = "-".to_string();
                 hshake.encode(&mut stream).await?;
             }
+
+            PacketKind::LoginRequest(req) => {
+                tracing::info!("Player <{}> is logging...", req.username);
+            }
         }
     }
 }

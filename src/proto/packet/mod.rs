@@ -2,10 +2,16 @@ use color_eyre::Result;
 use monoio::io::{AsyncReadRentExt, AsyncWriteRent};
 
 mod handshake;
+mod kick;
+mod login_request;
+
 pub use handshake::*;
+pub use kick::*;
+pub use login_request::*;
 
 pub enum PacketKind {
     Handshake(Handshake),
+    LoginRequest(LoginRequest),
 }
 
 pub trait Packet {

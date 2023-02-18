@@ -1,6 +1,8 @@
 use color_eyre::{eyre::format_err, Result};
 use monoio::io::{AsyncReadRent, AsyncReadRentExt};
 
+use crate::proto::packet::LoginRequest;
+
 use self::packet::{Handshake, Packet, PacketKind};
 
 pub mod decoder;
@@ -18,6 +20,7 @@ impl Packets {
         tracing::debug!("Trying to decode packet: {packet_id}");
         match packet_id {
             0x02 => Ok(PacketKind::Handshake(Handshake::decode(r).await?)),
+            0x01 => Ok(PacketKind::LoginRequest(LoginRequest::decode(r).await?)),
             _ => Err(format_err!("unknown packet: {packet_id}")),
         }
     }
